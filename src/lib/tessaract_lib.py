@@ -25,6 +25,7 @@ def get_component(img):
         api.SetRectangle(box['x'], box['y'], box['w'], box['h'])
         ocrResult = api.GetUTF8Text()
         conf = api.MeanTextConf()
+        print(box)
         print(u"Box[{0}]: x={x}, y={y}, w={w}, h={h}, "
               "confidence: {1}, text: {2}".format(i, conf, ocrResult, **box))
 
@@ -40,14 +41,12 @@ def orientation_detection(img):
     print("Deskew angle: {:.4f}".format(deskew_angle))
 
 
-def print_pages(pdf_file):
+def run_ocr(pdf_file):
     images = pdf_to_img(pdf_file)
     for pg, img in enumerate(images):
-        orientation_detection(img)
-    #     text, confidence = ocr_core(img)
-    #     print(text)
-    #     print(confidence)
-    #     print("********************************************************")
+        # orientation_detection(img)
+        get_component(img)
+        # print(text)
+        # print(confidence)
+        print("********************************************************")
 
-
-print_pages('Form-Original-1-9.pdf')
