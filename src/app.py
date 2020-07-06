@@ -16,21 +16,24 @@ APP.config['DEBUG'] = True
 
 @APP.route("/extract/data", methods=['POST'])
 def extract_ocr_data():
+    doc = []
     if not request.data:
-        response = {"response": {"ErrorCode": 400, "Status": "ValidationError", "message": "no request content found"}}
+        response = {"response": {"status": 400, "error": "ValidationError", "message": "no request content found"}}
     else:
         content = request.get_json(silent=True)
         if "path" not in content:
-            response = {"response": { "ErrorCode": 400, "Status": "ValidationError", "message": "path is required" }}
+            response = {"response": { "status": 400, "error": "ValidationError", "message": "path is required" }}
         elif "name" not in content:
-            response = {"response": { "ErrorCode": 400, "Status": "ValidationError", "message": "name is required" }}
+            response = {"response": { "status": 400, "error": "ValidationError", "message": "name is required" }}
         else: 
             file_path = content["path"]
             file_name = content["name"]
             
-            run_ocr('Form-Original-1-9.pdf')
+            doc = run_ocr('Form-Original-1-9.pdf')
+            print(len(doc))
+            response = {"response": { "status": 200, "data": doc }}
 
-    return 0
+    return json.dumps(response)
 
  #invoking the app instance
 if __name__ == '__main__':

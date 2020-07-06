@@ -19,15 +19,19 @@ def get_component(img):
     api.SetImage(img)
     boxes = api.GetComponentImages(RIL.TEXTLINE, True)
     print('Found {} textline image components.'.format(len(boxes)))
+    page = []
     for i, (im, box, _, _) in enumerate(boxes):
         # im is a PIL image object
         # box is a dict with x, y, w and h keys
         api.SetRectangle(box['x'], box['y'], box['w'], box['h'])
         ocrResult = api.GetUTF8Text()
         conf = api.MeanTextConf()
-        print(box)
-        print(u"Box[{0}]: x={x}, y={y}, w={w}, h={h}, "
-              "confidence: {1}, text: {2}".format(i, conf, ocrResult, **box))
+        box["text"] = ocrResult
+        box["confidence"] = conf
+        page.append(box)
+
+    return page 
+
 
 def orientation_detection(img):
     api.SetImage(img)
@@ -43,10 +47,8 @@ def orientation_detection(img):
 
 def run_ocr(pdf_file):
     images = pdf_to_img(pdf_file)
+    doc = []
     for pg, img in enumerate(images):
-        # orientation_detection(img)
-        get_component(img)
-        # print(text)
-        # print(confidence)
-        print("********************************************************")
-
+        page = get_component(img)
+        doc.append(page)
+    return doc
