@@ -12,7 +12,9 @@ else:
     db = couchserver.create(dbname)
 
 class Proposal:
-    def __init__(self, key, type, file_name, office_use, personal_inf, employment_inf, business_inf, causes_of_insolvency, transfer_assests, assets, money_owed, income_details, monthly_non_discreationary_expenses, monthly_discreationary_expenses, income_history):        self.__key = key
+    def __init__(self, key ,ocr_result ,type, file_name, office_use, personal_inf, employment_inf, business_inf, causes_of_insolvency, transfer_assests, assets, money_owed, income_details, monthly_non_discreationary_expenses, monthly_discreationary_expenses, income_history):        
+        self.__key = key
+        self.__proposal["ocr_result"] = ocr_result
         self.__proposal["type"] = type
         self.__proposal["office_use"] = office_use
         self.__proposal["personal_inf"] = personal_inf
