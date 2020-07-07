@@ -54,15 +54,11 @@ PROPOSAL = {
         "spouse_last_name": None,
         "spouse_given_name": None,
         "spouse_date_of_birth": {
-        "date": {
-                "year": None, "month": None, "day": None
-        }
-        },
-        "spouse_occupation": {
             "date": {
                     "year": None, "month": None, "day": None
             }
         },
+        "spouse_occupation": None,
         "household_dependents": []
     },
     "employement_inf": {
