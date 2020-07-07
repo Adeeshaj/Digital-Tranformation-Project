@@ -1,4 +1,4 @@
-import Levenshtein
+# import Levenshtein
 
 def is_selected(text):
     if(len(text)>0 and len(text)<3):

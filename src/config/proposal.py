@@ -62,7 +62,7 @@ PROPOSAL = {
             "date": {
                     "year": None, "month": None, "day": None
             }
-        }
+        },
         "household_dependents": []
     },
     "employement_inf": {
@@ -198,7 +198,7 @@ PROPOSAL = {
                 "acc_no": None,
                 "secured_against": None
             }
-        ]
+        ],
         "total_debt_amount_debtor": None,
         "total_debt_amount_spouse": None,
         "total_debt_amount_joint": None,
@@ -336,7 +336,7 @@ PROPOSAL = {
         "total": None
     },
     "income_history":{
-        "year": None
+        "year": None,
 	    "history": [
             {
                 "date": None,

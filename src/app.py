@@ -35,7 +35,7 @@ def extract_ocr_data():
             print(len(doc))
 
 
-            response = {"response": { "status": 200, "data": doc }}
+            response = {"response": { "status": 200, "data": proposal_obj }}
 
     return json.dumps(response)
 

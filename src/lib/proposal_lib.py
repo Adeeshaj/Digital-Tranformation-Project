@@ -4,57 +4,99 @@ BOX_TYPES = {"type": "TYPE", "office_use": "OFFICE_USE", "personal_inf": "PERSON
 
 
 def make_proposal_obj(doc):
-    doc = identify_box_types(doc)
-    temp_arr = []
-    for page in doc:
-        for box in page:
-            if(box["type"] == BOX_TYPES["type"]):
-                PROPOSAL["type"] = get_type(box)
+    components = identify_box_types(doc)
+    if (components[BOX_TYPES["type"]]):
+        PROPOSAL["type"] = get_type(components[BOX_TYPES["type"]][0])
+    
+    if (components[BOX_TYPES["office_use"]]):
+        for box in components[BOX_TYPES["office_use"]]:
+            keywords = [x.strip() for x in box["text"].split()]
+            keywords = [x.lower() for x in keywords]
 
+            if("year" in keywords or "month" in keywords or "day" in keywords):
+                date = [x.strip() for x in components[BOX_TYPES["office_use"]][components[BOX_TYPES["office_use"]].index(box)-1].split()]
+                if(len(date) == 3):
+                    PROPOSAL["office_use"]["date"]["year"] = date[0]
+                    PROPOSAL["office_use"]["date"]["month"] = date[1]
+                    PROPOSAL["office_use"]["date"]["day"] = date[2]
+            if("pb" in keywords or "cp" in keywords or "division" in keywords)
+                if(len(keywords)> 4):
+                    if("pb" in keywords):
+                        PROPOSAL["office_use"]["pb"] = keywords[keywords.index("pb")+1]
+                    if("cp" in keywords):
+                        PROPOSAL["office_use"]["pb"] = keywords[keywords.index("cp")+1]
+                    if("i" in keywords):
+                        PROPOSAL["office_use"]["pb"] = keywords[keywords.index("i")+1]
+                    if("j" in keywords):
+                        PROPOSAL["office_use"]["pb"] = keywords[keywords.index("j")+1]
+            if("payment" in keywords or "monthly" in keywords):
+                for keyword in keywords:
+                    flag = 0
+                    if(flag>0):
+                        if(flag==1 and isinstance(keyword, (int, long))):
+                            PROPOSAL["office_use"]["initial_payment"] = keyword
+                        if(flag==2 and isinstance(keyword, (int, long))):
+                            PROPOSAL["office_use"]["monthly_payment"] = keyword
+                        if(flag==3 and isinstance(keyword, (int, long))):
+                            PROPOSAL["office_use"]["total_amount"] = keyword
+                    if(keyword == "$"):
+                        flag +=1
+                    if(keyword == "#"):
+                        PROPOSAL["office_use"]["number_of_months"] = keywords[keywords.index(keyword)+3]
+            if("comments" in keywords):
+                if(len(keywords)>1):
+                    PROPOSAL["office_use"]["comments"] = " ".join(keywords[1:])
+            
+    return components
 
     
 
 def identify_box_types(doc):
     box_type = None
+    components = {}
     for page in doc:
         for box in page:
-            if box_checker(box) is not "NONE":
+            if box_checker(box) is not BOX_TYPES["none"]:
                 box_type = box_checker(box)
+                components[box_type] = []
             box["type"] = box_type
+            print(box)
+            if box_type is not None:
+                components[box_type].append(box)
     
-    for page in doc:
-        for box in page:
-    return doc
+
+    return components
 
 
 def box_checker(box):
     keywords = [x.strip() for x in box["text"].split()]
+    keywords = [x.lower() for x in keywords]
     
-    if("Bankruptcy" in keywords and "Consumer" in keywords and "Proposal" in keywords):
+    if("bankruptcy" in keywords and "consumer" in keywords and "proposal" in keywords):
         return BOX_TYPES["type"]
-    elif("OFFICE" in keywords and "USE" in keywords and "ONLY" in keywords):
+    elif("office" in keywords and "use" in keywords and "only" in keywords):
         return BOX_TYPES["office_use"]
-    elif("QUESTIONS" in keywords and "PLEASED" in keywords and "CALL" in keywords):
+    elif("questions" in keywords and "pleased" in keywords and "call" in keywords):
         return BOX_TYPES["personal_inf"]
-    elif("EMPLOYMENT" in keywords and "INFORMATION" in keywords):
+    elif("employment" in keywords and "information" in keywords):
         return BOX_TYPES["employment_inf"]
-    elif("BUSINESS" in keywords and "INFORMATION" in keywords):
+    elif("business" in keywords and "information" in keywords):
         return BOX_TYPES["business_inf"]
-    elif("CAUSES" in keywords and "OF" in keywords):
+    elif("cuases" in keywords and "of" in keywords):
         return BOX_TYPES["causes_of_insolvency"]
-    elif("TRANSFER" in keywords and "OF" in keywords and "ASSETS" in keywords):
+    elif("transfer" in keywords and "of" in keywords and "assets" in keywords):
         return BOX_TYPES["transfer_assests"]
-    elif("ASSETS" in keywords):
+    elif("assets" in keywords):
         return BOX_TYPES["assets"]
-    elif("EVERYONE" in keywords and "OWE" in keywords and "MONEY" in keywords):
+    elif("everyone" in keywords and "owe" in keywords and "money" in keywords):
         return BOX_TYPES["money_owed"]
-    elif("INCOME" in keywords and "DETAILS" in keywords):
+    elif("income" in keywords and "details" in keywords):
         return BOX_TYPES["income_details"]
-    elif("NON-DISCRETIONARY" in keywords):
+    elif("non-discreationary" in keywords):
         return BOX_TYPES["monthly_non_discreationary_expenses"]
-    elif("HOUSING" in keywords and "EXPENSES" in keywords):
+    elif("housing" in keywords and "expenses" in keywords):
         return BOX_TYPES["monthly_discreationary_expenses"]
-    elif("EMPLOYER" in keywords and "CURRENT" in keywords and "DIFFERENT" in keywords):
+    elif("employer" in keywords and "current" in keywords and "different" in keywords):
         return BOX_TYPES["income_history"]
     else: 
         return BOX_TYPES["none"]
