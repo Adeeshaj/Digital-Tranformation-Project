@@ -1,6 +1,6 @@
 from lib.ml_lib import is_selected
 from config.proposal import PROPOSAL
-BOX_TYPES = {"type": "TYPE", "office_use": "OFFICE_USE", "personal_inf": "PERSONAL_INF", "employment_inf": "EMPLOYMENT_INF", "business_inf": "BUSINESS_INF", "causes_of_insolvency": "CAUSES_OF_INSOLVENCY", "transfer_assests": "TRANSFER_ASSETS", "assets": "ASSETS", "money_owed": "MONEY_OWED", "income_details": "INCOME_DETAILS", "monthly_non_discreationary_expenses": "MONTHLY_NON_DISCREATIONARY_EXPENCES", "monthly_discreationary_expenses": "MONTHLY_DISCREATIONAY_EXPENSES", "income_history": "INCOME_HISTORY", "none": "NONE"}
+BOX_TYPES = {"type": "TYPE", "office_use": "OFFICE_USE", "personal_inf": "PERSONAL_INF", "employment_inf": "EMPLOYMENT_INF", "business_inf": "BUSINESS_INF", "causes_of_insolvency": "CAUSES_OF_INSOLVENCY", "transfer_assets": "TRANSFER_ASSETS", "assets": "ASSETS", "money_owed": "MONEY_OWED", "income_details": "INCOME_DETAILS", "monthly_non_discreationary_expenses": "MONTHLY_NON_DISCREATIONARY_EXPENCES", "monthly_discreationary_expenses": "MONTHLY_DISCREATIONAY_EXPENSES", "income_history": "INCOME_HISTORY", "none": "NONE"}
 
 
 def make_proposal_obj(doc):
@@ -14,7 +14,19 @@ def make_proposal_obj(doc):
     if BOX_TYPES["personal_inf"] in components:
         PROPOSAL["personal_inf"] = get_personal_inf(components[BOX_TYPES["personal_inf"]], PROPOSAL["personal_inf"])
     
+    if BOX_TYPES["employment_inf"] in components:
+        PROPOSAL["employment_inf"] = get_employment_inf(components[BOX_TYPES["employment_inf"]], PROPOSAL["employment_inf"])
 
+    if BOX_TYPES["business_inf"] in components:
+        PROPOSAL["business_inf"] = get_business_inf(components[BOX_TYPES["business_inf"]], PROPOSAL["business_inf"])
+    
+    if BOX_TYPES["causes_of_insolvency"] in components:
+        PROPOSAL["causes_of_insolvency"] = get_causes_of_insolvency(components[BOX_TYPES["causes_of_insolvency"]], PROPOSAL["causes_of_insolvency"])
+    
+    if BOX_TYPES["transfer_assets"] in components:
+        PROPOSAL["transfer_assets"] = get_transfer_assets(components[BOX_TYPES["transfer_assets"]], PROPOSAL["transfer_assets"])
+    
+    
     return PROPOSAL
 
     
@@ -48,10 +60,10 @@ def box_checker(box):
         return BOX_TYPES["employment_inf"]
     elif("business" in keywords and "information" in keywords):
         return BOX_TYPES["business_inf"]
-    elif("cuases" in keywords and "of" in keywords):
+    elif("causes" in keywords and "of" in keywords):
         return BOX_TYPES["causes_of_insolvency"]
-    elif("transfer" in keywords and "of" in keywords and "assets" in keywords):
-        return BOX_TYPES["transfer_assests"]
+    elif("disposed" in keywords and "pledge" in keywords and "property" in keywords):
+        return BOX_TYPES["transfer_assets"]
     elif("assets" in keywords):
         return BOX_TYPES["assets"]
     elif("everyone" in keywords and "owe" in keywords and "money" in keywords):
@@ -68,7 +80,7 @@ def box_checker(box):
         return BOX_TYPES["none"]
 
 def get_type(box):
-    default = "CONSUMER"
+    default = "BANKRUPTCY"
     keywords = [x.strip() for x in box["text"].split()]
     if (keywords.index("Bankruptcy") != 0 and is_selected(keywords[keywords.index("Bankruptcy")-1])):
         return "BANKRUPTCY"
@@ -134,7 +146,7 @@ def get_personal_inf(boxes, personal_inf):
                 names_2 = [x.strip() for x in boxes[boxes.index(box)+1]["text"].split()]
                 personal_inf["occupation"] = " ".join(names_2[-2:])
                 personal_inf["other_names"] = " ".join(names_2[:-2])
-        if("address" in keywords or "city" in keywords):
+        if("address" in keywords or "address:" in keywords or "city:" in keywords):
             if(len(keywords)>0):
                 names_3 = [x.strip() for x in boxes[boxes.index(box)+1]["text"].split()]
                 personal_inf["city"] = " ".join(names_3[-1:])
@@ -256,11 +268,119 @@ def get_personal_inf(boxes, personal_inf):
                 index += 1
     return personal_inf                    
 
+def get_employment_inf(boxes, employment_inf):
+    for box in boxes:
+        keywords = [x.strip() for x in box["text"].split()]
+        keywords = [x.lower() for x in keywords]
 
+        if("current" in keywords and "employed" in keywords):
+            names_1 = [x.strip() for x in boxes[boxes.index(box)+1]["text"].split()]
 
+            if(len(names_1)>4):
+                employment_inf["employed_since"]["date"]["year"] = names_1[-2]
+                employment_inf["employed_since"]["date"]["month"] = names_1[-1]
 
+    return employment_inf
+
+def get_business_inf(boxes, business_inf):            
+    for box in boxes:
+        keywords = [x.strip() for x in box["text"].split()]
+        keywords = [x.lower() for x in keywords]
+
+        if("owned" in keywords and "interest" in keywords and "business" in keywords):
+            if(keywords[-1] == 'n'):
+                business_inf["owned"] = "Y"
+            else:
+                business_inf["owned"] = "N"
+        if("percentage" in keywords and "of" in keywords and "ownership" in keywords):
+            if(keywords[-2] != 'ownership'):
+                business_inf["percentage_ownership"] = keywords[-2]
+        if("been" in keywords and "self" in keywords and "employed" in keywords):
+            if(keywords[-1] == 'n'):
+                business_inf["self_employed"] = "Y"
+            else:
+                business_inf["self_employed"] = "N"
+        if("name" in keywords and "of" in keywords and "business" in keywords):
+            names_1 = [x.strip() for x in boxes[boxes.index(box)+1]["text"].split()]
+            business_inf["name"] = " ".join(names_1)
+        if("address:" in keywords and "city:" in keywords ):
+            business_inf["address"] = " ".join(keywords[keywords.index("address:")+1:keywords.index("city:")])
+            business_inf["city"] = " ".join(keywords[keywords.index("city:")+1:])
+        if("province:" in keywords and "postal" in keywords and "code:" in keywords):
+            business_inf["province"] = " ".join(keywords[keywords.index("province:")+1:keywords.index("postal")])
+            business_inf["postal_code"] = " ".join(keywords[keywords.index("code:")+1:])
+        if("commenced:" in keywords and "when" in keywords and "ceased:" in keywords):
+            business_inf["details"]["commenced"] = " ".join(keywords[keywords.index("commenced:"):keywords.index("when")])
+            business_inf["details"]["ceased"] = " ".join(keywords[keywords.index("ceased:"):])
+        if("nature" in keywords and "of" in keywords and "business:" in keywords):    
+            business_inf["details"]["nature"] = " ".join(keywords[keywords.index("business:")+1:])
+        if("corporation:" in keywords and "proprietorship:" in keywords and "partnership:" in keywords):  
+            if(keywords.index("corporation:") != 0 and is_selected(keywords[keywords.index("corporation:")+1])):
+                business_inf["details"]["ownership_type"] = "CORPORATION"
+            if(keywords.index("proprietorship:") != 0 and is_selected(keywords[keywords.index("proprietorship:")+1])):
+                business_inf["details"]["ownership_type"] = "SOLE"
+            if(keywords.index("partnership:") != 0 and is_selected(keywords[keywords.index("partnership:")+1])):
+                business_inf["details"]["ownership_type"] = "PARTNERSHIP"
+        if("percentage" in keywords and "debts" in keywords and "incurred" in keywords):
+            names_2 = [x.strip() for x in boxes[boxes.index(box)+1]["text"].split()]
+            if("business:" in names_2 and len(names_2)>2):
+                business_inf["percentage_debts"] = names_2[names_2.index("business:")+1]
+    return business_inf
             
-
-
-
+def get_causes_of_insolvency(boxes, causes_of_insolvency):            
+    for box in boxes:
+        keywords = [x.strip() for x in box["text"].split()]
+        keywords = [x.lower() for x in keywords]
+        
+        if("current" in keywords and "financial" in keywords and "problems:" in keywords):    
+            causes_of_insolvency["opinion"] = " ".join(keywords[keywords.index("problems:"):])
+        if("previously" in keywords and "you" in keywords and "bankrupt?" in keywords):
+            if(keywords[-1] == 'n'):
+                causes_of_insolvency["previously_bankrupted"] = "Y"
+            else:
+                causes_of_insolvency["previously_bankrupted"] = "N"  
+        if("previously" in keywords and "you" in keywords and "proposal?" in keywords):
+            if(keywords[-1] == 'n'):
+                causes_of_insolvency["previously_proposaled"] = "Y"
+            else:
+                causes_of_insolvency["previously_proposaled"] = "N"  
+    return causes_of_insolvency
+        
+def get_transfer_assets(boxes, transfer_assets):            
+    for box in boxes:
+        keywords = [x.strip() for x in box["text"].split()]
+        keywords = [x.lower() for x in keywords]
+        
+        if("disposed" in keywords and "pledge" in keywords and "property" in keywords):
+            if(keywords[-1] == 'n'):
+                transfer_assets["disposed_pleged_property"]["selection"] = "Y"
+            else:
+                transfer_assets["disposed_pleged_property"]["selection"] = "N"  
+        if("excess" in keywords and "payments" in keywords and "creditors" in keywords):
+            if(keywords[-1] == 'n'):
+                transfer_assets["exess_payment_to_creditors"]["selection"] = "Y"
+            else:
+                transfer_assets["exess_payment_to_creditors"]["selection"] = "N"  
+        if("property" in keywords and "seized" in keywords and "creditors" in keywords):
+            if(keywords[-1] == 'n'):
+                transfer_assets["property_seized"]["selection"] = "Y"
+            else:
+                transfer_assets["property_seized"]["selection"] = "N"  
+        if("disposed" in keywords and "transferred" in keywords and "property" in keywords):
+            if(keywords[-1] == 'n'):
+                transfer_assets["sold_property"]["selection"] = "Y"
+            else:
+                transfer_assets["sold_property"]["selection"] = "N"  
+        if("made" in keywords and "gifts" in keywords and "relatives" in keywords):
+            if(keywords[-1] == 'n'):
+                transfer_assets["gifts"]["selection"] = "Y"
+            else:
+                transfer_assets["gifts"]["selection"] = "N"  
+        if("expect" in keywords and "receive" in keywords and "money" in keywords):
+            if(keywords[-1] == 'n'):
+                transfer_assets["expect_money"]["selection"] = "Y"
+            else:
+                transfer_assets["expect_money"]["selection"] = "N"  
+    
+    return transfer_assets
 

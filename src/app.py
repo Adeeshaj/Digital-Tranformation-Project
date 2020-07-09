@@ -10,6 +10,7 @@ import json
 from flask import Flask, request
 from lib.tessaract_lib import run_ocr
 from lib.proposal_lib import make_proposal_obj
+from models.proposal import Proposal
 ####################################################################################################
 
 APP = Flask(__name__)
@@ -30,13 +31,13 @@ def extract_ocr_data():
             file_path = content["path"]
             file_name = content["name"]
             
-            doc = run_ocr('Form-Original-1-9.pdf')
+            doc = run_ocr(file_path)
             proposal_obj = make_proposal_obj(doc)
             print(len(doc))
-
-
+            proposal = Proposal(doc ,file_name, proposal_obj)
+            proposal_id = proposal.save()
             response = {"response": { "status": 200, "data": proposal_obj }}
-
+    print("Done!")
     return json.dumps(response)
 
  #invoking the app instance

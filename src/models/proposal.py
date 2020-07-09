@@ -2,7 +2,7 @@ import couchdb
 
 user = "admin"
 password = "admin"
-couchserver = couchdb.Server("http://%s:%s@couchdb:5984/" % (user, password))
+couchserver = couchdb.Server("http://%s:%s@localhost:5984/" % (user, password))
 
 #Select/Create DB
 dbname = "proposal"
@@ -12,27 +12,37 @@ else:
     db = couchserver.create(dbname)
 
 class Proposal:
-    def __init__(self, key ,ocr_result ,type, file_name, office_use, personal_inf, employment_inf, business_inf, causes_of_insolvency, transfer_assests, assets, money_owed, income_details, monthly_non_discreationary_expenses, monthly_discreationary_expenses, income_history):        
-        self.__key = key
-        self.__proposal["ocr_result"] = ocr_result
-        self.__proposal["type"] = type
-        self.__proposal["office_use"] = office_use
-        self.__proposal["personal_inf"] = personal_inf
-        self.__proposal["employment_inf"] = employment_inf
-        self.__proposal["business_inf"] = business_inf
-        self.__proposal["causes_of_insolvency"] = causes_of_insolvency
-        self.__proposal["transfer_assests"] = transfer_assests
-        self.__proposal["assets"] = assets
-        self.__proposal["money_owed"] = money_owed
-        self.__proposal["income_details"] = income_details
-        self.__proposal["monthly_non_discreationary_expenses"] = monthly_non_discreationary_expenses
-        self.__proposal["monthly_discreationary_expenses"] = monthly_discreationary_expenses
-        self.__proposal["income_history"] = income_history
+    def __init__(self, ocr_result ,file_name, proposal):
+
+        self.__ocr_result = ocr_result
+        self.__file_name = file_name
+        self.__proposal = proposal
+
+    def save(self):
+        try:
+            doc_id, doc_rev = db.save({
+                "ocr_result": self.__ocr_result,
+                "file_name": self.__file_name,
+                "proposal": self.__proposal
+            })
+            return doc_id
+        except Exception as e:
+            print(e)
 
 
-def save():
-    doc_id, doc_rev = db.save({self.__key: self.__proposal})
-    return doc_id
+    def update_proposal(doc_id, proposal):
+        try:
+            doc = db[doc_id]
+            doc["proposal"] = proposal
+        except Exception as e:
+            print(e)
+
+    def update_ocr_result(doc_id, ocr_result):
+        try:
+            doc = db[doc_id]
+            doc["ocr_result"] = ocr_result
+        except Exception as e:
+            print(e)
 
 
 

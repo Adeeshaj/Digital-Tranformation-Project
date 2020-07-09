@@ -61,14 +61,13 @@ PROPOSAL = {
         "spouse_occupation": None,
         "household_dependents": []
     },
-    "employement_inf": {
+    "employment_inf": {
             "employer": None,
             "position": None,
             "employed_since": {
-            "date": {
+                "date": {
                     "year": None, 
-                    "month": None, 
-                    "day": None
+                    "month": None
                 }
         }
     },
@@ -82,20 +81,8 @@ PROPOSAL = {
         "province": None,
         "postal_code": None,
         "details": {
-            "commenced": {
-                "date": {
-                    "year": None, 
-                    "month": None, 
-                    "day": None
-                }
-            },
-            "ceased": {
-                "date": {
-                    "year": None, 
-                    "month": None,
-                    "day": None
-                }
-            },
+            "commenced": None,
+            "ceased": None,
             "nature": None,
             "ownership_type": None
         },
@@ -109,27 +96,27 @@ PROPOSAL = {
     },
     "transfer_assets": {
         "disposed_pleged_property": {
-			"Selection": None,
+			"selection": None,
 			"description": None
         },
         "exess_payment_to_creditors": {
-            "Selection": None,
+            "selection": None,
             "description": None
         },
         "property_seized": {
-            "Selection": None,
+            "selection": None,
             "description": None
         },
         "sold_property": {
-            "Selection": None,
+            "selection": None,
             "description": None
         },
         "gifts": {
-            "Selection": None,
+            "selection": None,
             "description": None
         },
         "expect_money": {
-            "Selection": None,
+            "selection": None,
             "description": None
         },
 		"comments": None
